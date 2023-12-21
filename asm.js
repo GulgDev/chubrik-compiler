@@ -21,10 +21,10 @@ class Token {
 }
 
 export class Asm {
-    static function tokenize(asm) {
+    static tokenize(asm) {
     }
     
-    static function compile(asm) {
+    static compile(asm) {
         return [0b00000000, 0b01010100];
     }
 }
