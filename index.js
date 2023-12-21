@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const source = document.getElementById("source");
     const output = document.getElementById("output");
 
-    source.addEventListener("changed", () => {
+    source.addEventListener("change", () => {
         output.value = compile(source.value);
     });
 });
