@@ -1,5 +1,5 @@
-import { GameMap } from "./arrows";
-import { Asm } from "./asm";
+import { GameMap } from "./arrows.js";
+import { Asm } from "./asm.js";
 
 function compile(asm) {
     const gameMap = new GameMap();
