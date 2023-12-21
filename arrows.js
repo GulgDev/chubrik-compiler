@@ -7,7 +7,7 @@ class Arrow {
 }
 
 class Chunk {
-    arrows = new Array(CHUNK_SIZE ** 2).map(() => new Arrow());
+    arrows = new Array(CHUNK_SIZE ** 2).fill().map(() => new Arrow());
     
     constructor(x, y) {
         this.x = x;
