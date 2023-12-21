@@ -1,8 +1,15 @@
-import { GameMap } from "./arrows.js";
+import { GameMap } from "./arrows";
+import { Asm } from "./asm";
 
 function compile(asm) {
     const gameMap = new GameMap();
-    gameMap.setArrow(0, 0, 1, 0, false);
+    let byteOffset = 0;
+    for (const byte of Asm.compile(asm)) {
+        let bitOffset = 0;
+        for (const bit of byte.toString(2).padStart(8, "0").split("").map((bit) => bit === "1"))
+            gameMap.setArrow(bitOffset, byteOffset * 2, bit ? 7 : 1, 1, false);
+        byteOffset++;
+    }
     return gameMap.save();
 }
 
