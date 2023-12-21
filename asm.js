@@ -21,10 +21,13 @@ class Token {
 }
 
 export class Asm {
-    static tokenize(asm) {
+    static *tokenize(asm) {
+        yield new Token(TOKEN.CHAR, ".", [0, 0]);
     }
     
     static compile(asm) {
+        const gen = this.tokenize(asm);
+        let token = gen.next().value;
         return [0b00000000, 0b01010100];
     }
 }
