@@ -40,9 +40,9 @@ export class GameMap {
 
     getChunkByArrowCoordinates(x, y) {
         const negativeCorrectionX = x < 0 ? 1 : 0;
-        const negativeCorrectionY = x < 0 ? 1 : 0;
-        const chunkX = ~~((x + negativeCorrectionX) / CHUNK_SIZE) - negativeCorrectionY;
-        const chunkY = ~~((y + negativeCorrectionX) / CHUNK_SIZE) - negativeCorrectionY;
+        const negativeCorrectionY = y < 0 ? 1 : 0;
+        const chunkX = ~~((x + negativeCorrectionX) / CHUNK_SIZE) - negativeCorrectionX;
+        const chunkY = ~~((y + negativeCorrectionY) / CHUNK_SIZE) - negativeCorrectionY;
         return this.getChunk(chunkX, chunkY);
     }
 
