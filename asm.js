@@ -210,6 +210,10 @@ export class Asm {
                     throw new Error("unknown command");
 
                 bytes.push(opcode);
+
+                for (const [type, value] of args) {
+                    
+                }
             } else
                 throw new Error("unexpected token");
         }
