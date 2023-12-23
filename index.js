@@ -12,6 +12,9 @@ function compile(asm) {
         return errorMessage;
     }
 
+    if (compiler.bytes.length === 0)
+        return "";
+
     return buildDisk(compiler.bytes);
 }
 
@@ -20,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const output = document.getElementById("output");
 
     source.addEventListener("input", () => {
+        history.pushState(null, "", `?code=${encodeURIComponent(source.value)}`);
         output.value = compile(source.value);
     });
 });
