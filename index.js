@@ -22,8 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const source = document.getElementById("source");
     const output = document.getElementById("output");
 
-    source.addEventListener("input", () => {
+    function update() {
         history.pushState(null, "", `?code=${encodeURIComponent(source.value)}`);
         output.value = compile(source.value);
-    });
+    }
+
+    source.value = new URLSearchParams(location.search).get("code");
+    source.addEventListener("input", update);
+    update();
 });
