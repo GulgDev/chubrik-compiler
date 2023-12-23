@@ -2,8 +2,8 @@ import { Compiler } from "./asm.js";
 import { buildDisk } from "./builder.js";
 
 function compile(asm) {
-    const compiler = new Compiler();
-    compiler.compile(asm);
+    const compiler = new Compiler(asm);
+    compiler.compile();
 
     if (compiler.errors.length > 0) {
         let errorMessage = `Compilation failed (${compiler.errors.length} error${compiler.errors.length > 1 ? "s" : ""})\n\n`;

@@ -4,8 +4,7 @@ const Args = {
     C: 0x2,
     D: 0x3,
     ZERO: 0x4,
-    NUM: 0x5,
-    REF: 0x6
+    BYTE: 0x5
 };
 
 const instructions = [
@@ -16,6 +15,10 @@ const instructions = [
 ];
 
 const registers = ["a", "b", "c", "d"];
+
+const keywords = ["db", "equ"];
+
+const operators = ["+", "-"];
 
 class Command {
     constructor(instruction, args, opcode) {
@@ -30,8 +33,8 @@ class Command {
         if (match)
             for (let i = 0; i < argc; ++i) {
                 const argType = this.args[i];
-                const input = args[i][0];
-                if (argType !== input && !(input === Args.ZERO && argType === Args.NUM) && !(input === Args.NUM && argType === Args.REF)) {
+                const { type, value } = args[i];
+                if (argType !== type && !(argType === Args.ZERO && value !== 0)) {
                     match = false;
                     break;
                 }
@@ -152,22 +155,22 @@ const commands = [
     new Command("rcr", [Args.C], 0x66),
     new Command("rcr", [Args.D], 0x67),
 
-    new Command("ld", [Args.A, Args.NUM], 0x80),
-    new Command("ld", [Args.B, Args.NUM], 0x81),
-    new Command("ld", [Args.C, Args.NUM], 0x82),
-    new Command("ld", [Args.D, Args.NUM], 0x83),
-    new Command("ld", [Args.A, Args.NUM], 0x84),
-    new Command("ld", [Args.B, Args.NUM], 0x85),
-    new Command("ld", [Args.C, Args.NUM], 0x86),
-    new Command("ld", [Args.D, Args.NUM], 0x87),
-    new Command("ldi", [Args.A, Args.NUM], 0x88),
-    new Command("ldi", [Args.B, Args.NUM], 0x89),
-    new Command("ldi", [Args.C, Args.NUM], 0x8A),
-    new Command("ldi", [Args.D, Args.NUM], 0x8B),
-    new Command("ldi", [Args.A, Args.NUM], 0x8C),
-    new Command("ldi", [Args.B, Args.NUM], 0x8D),
-    new Command("ldi", [Args.C, Args.NUM], 0x8E),
-    new Command("ldi", [Args.D, Args.NUM], 0x8F),
+    new Command("ld", [Args.A, Args.BYTE], 0x80),
+    new Command("ld", [Args.B, Args.BYTE], 0x81),
+    new Command("ld", [Args.C, Args.BYTE], 0x82),
+    new Command("ld", [Args.D, Args.BYTE], 0x83),
+    new Command("ld", [Args.A, Args.BYTE], 0x84),
+    new Command("ld", [Args.B, Args.BYTE], 0x85),
+    new Command("ld", [Args.C, Args.BYTE], 0x86),
+    new Command("ld", [Args.D, Args.BYTE], 0x87),
+    new Command("ldi", [Args.A, Args.BYTE], 0x88),
+    new Command("ldi", [Args.B, Args.BYTE], 0x89),
+    new Command("ldi", [Args.C, Args.BYTE], 0x8A),
+    new Command("ldi", [Args.D, Args.BYTE], 0x8B),
+    new Command("ldi", [Args.A, Args.BYTE], 0x8C),
+    new Command("ldi", [Args.B, Args.BYTE], 0x8D),
+    new Command("ldi", [Args.C, Args.BYTE], 0x8E),
+    new Command("ldi", [Args.D, Args.BYTE], 0x8F),
     
     new Command("ld", [Args.A, Args.A], 0x90),
     new Command("ld", [Args.B, Args.A], 0x91),
@@ -186,14 +189,14 @@ const commands = [
     new Command("ld", [Args.C, Args.D], 0x9E),
     new Command("ld", [Args.D, Args.D], 0x9F),
 
-    new Command("st", [Args.A, Args.NUM], 0xA0),
-    new Command("st", [Args.B, Args.NUM], 0xA1),
-    new Command("st", [Args.C, Args.NUM], 0xA2),
-    new Command("st", [Args.D, Args.NUM], 0xA3),
-    new Command("st", [Args.A, Args.NUM], 0xA4),
-    new Command("st", [Args.B, Args.NUM], 0xA5),
-    new Command("st", [Args.C, Args.NUM], 0xA6),
-    new Command("st", [Args.D, Args.NUM], 0xA7),
+    new Command("st", [Args.A, Args.BYTE], 0xA0),
+    new Command("st", [Args.B, Args.BYTE], 0xA1),
+    new Command("st", [Args.C, Args.BYTE], 0xA2),
+    new Command("st", [Args.D, Args.BYTE], 0xA3),
+    new Command("st", [Args.A, Args.BYTE], 0xA4),
+    new Command("st", [Args.B, Args.BYTE], 0xA5),
+    new Command("st", [Args.C, Args.BYTE], 0xA6),
+    new Command("st", [Args.D, Args.BYTE], 0xA7),
     new Command("rnd", [Args.A], 0xA8),
     new Command("rnd", [Args.B], 0xA9),
     new Command("rnd", [Args.C], 0xAA),
@@ -254,18 +257,18 @@ const commands = [
     new Command("jns", [Args.D], 0xDE),
     new Command("jno", [Args.D], 0xDF),
 
-    new Command("jz", [Args.REF], 0xE0),
-    new Command("jc", [Args.REF], 0xE1),
-    new Command("js", [Args.REF], 0xE2),
-    new Command("jo", [Args.REF], 0xE3),
-    new Command("jnz", [Args.REF], 0xE4),
-    new Command("jnc", [Args.REF], 0xE5),
-    new Command("jns", [Args.REF], 0xE6),
-    new Command("jno", [Args.REF], 0xE7),
-    new Command("jmp", [Args.REF], 0xE8),
-    new Command("jmp", [Args.REF], 0xE9),
-    new Command("jmp", [Args.REF], 0xEA),
-    new Command("jmp", [Args.REF], 0xEB),
+    new Command("jz", [Args.BYTE], 0xE0),
+    new Command("jc", [Args.BYTE], 0xE1),
+    new Command("js", [Args.BYTE], 0xE2),
+    new Command("jo", [Args.BYTE], 0xE3),
+    new Command("jnz", [Args.BYTE], 0xE4),
+    new Command("jnc", [Args.BYTE], 0xE5),
+    new Command("jns", [Args.BYTE], 0xE6),
+    new Command("jno", [Args.BYTE], 0xE7),
+    new Command("jmp", [Args.BYTE], 0xE8),
+    new Command("jmp", [Args.BYTE], 0xE9),
+    new Command("jmp", [Args.BYTE], 0xEA),
+    new Command("jmp", [Args.BYTE], 0xEB),
     new Command("hlt", [], 0xEC),
     new Command("hlt", [], 0xED),
     new Command("hlt", [], 0xEE),
@@ -296,6 +299,8 @@ class Token {
     static CHAR = 0x3;
     static REGISTER = 0x4;
     static EOF = 0x5;
+    static KEYWORD = 0x6;
+    static OPERATOR = 0x7;
 
     constructor(type, value, position) {
         this.type = type;
@@ -308,7 +313,7 @@ class Token {
     }
 }
 
-const whitespace = /^[ \n\r]$/;
+const whitespace = /^[ \r]$/;
 const digit = /^[0-9]$/;
 const letter = /^[a-z]$/i;
 
@@ -338,24 +343,30 @@ class Tokenizer {
         ++this.offset;
     }
 
-    lookahead() {
+    lookahead(skipNewline=true) {
         const { offset, line, column } = this;
-        const token = this.next();
+        const token = this.next(skipNewline);
         this.offset = offset;
         this.line = line;
         this.column = column;
         return token;
     }
 
-    next() {
-        while (whitespace.test(this.peekch()))
+    skipWhitespace(skipNewline) {
+        while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n"))
             this.consume();
+    }
+
+    next(skipNewline=true) {
+        this.skipWhitespace(skipNewline);
         
         while (this.peekch() === ";") {
             this.consume();
             while (this.peekch() !== "\n" && this.peekch() != null)
                 this.consume();
         }
+
+        this.skipWhitespace(skipNewline);
 
         let ch = this.peekch();
         if (ch == null)
@@ -367,7 +378,7 @@ class Tokenizer {
         else {
             const { position } = this;
             this.consume();
-            return new Token(Token.CHAR, ch, position);
+            return new Token(operators.includes(ch) ? Token.OPERATOR : Token.CHAR, ch, position);
         }
     }
 
@@ -387,6 +398,8 @@ class Tokenizer {
             type = Token.INSTRUCTION;
         else if (registers.includes(name))
             type = Token.REGISTER;
+        else if (keywords.includes(name))
+            type = Token.KEYWORD;
         return new Token(type, name, position);
     }
 
@@ -416,63 +429,189 @@ class AsmError {
     }
 }
 
+class RefExpression {
+    values = [];
+    operations = [];
+    canResolve = false;
+
+    constructor(resolveCallback) {
+        this.resolveCallback = resolveCallback;
+    }
+
+    tryResolve() {
+        if (this.canResolve && this.values.every((value) => value != null))
+            this.resolveCallback(this.values.reduce((a, b, index) => {
+                if (a == null)
+                    return b;
+                switch (this.operations[index - 1]) {
+                    case "+":
+                        return a + b;
+                    case "-":
+                        return a - b;
+                }
+            }, null));
+    }
+
+    makeResolveCallback() {
+        const index = this.values.length;
+        this.values.push(null);
+        return (value) => {
+            this.values[index] = value;
+            this.tryResolve();
+        };
+    }
+
+    set = this.makeResolveCallback();
+
+    add() {
+        this.operations.push("+");
+        return this.makeResolveCallback();
+    }
+
+    sub() {
+        this.operations.push("-");
+        return this.makeResolveCallback();
+    }
+
+    done() {
+        this.canResolve = true;
+        this.tryResolve();
+    }
+}
+
 export class Compiler {
     bytes = [];
     errors = [];
+    refs = [];
+    names = {};
+
+    constructor(source) {
+        this.tokenizer = new Tokenizer(source);
+    }
+
+    parseArgs() {
+        const args = [];
+        let token;
+        if ((token = this.tokenizer.lookahead(false)).type !== Token.CHAR || token.value !== "\n")
+            if (this.parseArg(args, false)) {
+                let i = 0;
+                while ((token = this.tokenizer.lookahead()).type === Token.CHAR && token.value === ",") {
+                    this.tokenizer.next();
+                    if (!this.parseArg(args, true))
+                        return null;
+                    ++i;
+                }
+            } else
+                return [];
+        return args;
+    }
+
+    parseArg(args, required=false) {
+        const token = this.tokenizer.lookahead();
+        const arg = { position: token.position };
+        if (token.type === Token.REGISTER) {
+            this.tokenizer.next();
+            arg.type = Args.A + registers.indexOf(token.value);
+        } else if (this.parseExpression((value) => {
+            arg.value = value;
+            arg.resolveCallback?.(value);
+        }, false)) {
+            arg.type = Args.BYTE;
+        } else if (required) {
+            this.errors.push(new AsmError(token.position, `unexpected ${token}`));
+            return false;
+        }
+        args.push(arg);
+        return true;
+    }
+
+    parseValue(resolveCallback, required=false) {
+        let token = this.tokenizer.lookahead();
+        if (token.type === Token.NAME) {
+            const value = this.names[token.value];
+            if (value != null)
+                resolveCallback(value);
+            else
+                this.refs.push({ name: token.value, resolveCallback, position: token.position });
+        } else if (token.type === Token.NUMBER)
+            resolveCallback(this.parseNumber(token));
+        else if (token.type === Token.CHAR && token.value === "$")
+            resolveCallback(this.bytes.length);
+        else {
+            if (required)
+                this.errors.push(new AsmError(token.position, `unexpected ${token}`));
+            return false;
+        }
+        this.tokenizer.next();
+        return true;
+    }
 
     parseNumber(token) {
         try {
-            if (token.value.length > 2 && token.value[0] === "0")
-                switch (token.value[1].toLowerCase()) {
-                    case "x":
-                        return parseInt(token.value.slice(2), 16);
-                    case "b":
-                        return parseInt(token.value.slice(2), 2);
-                }
+            if (token.value[0] === "0" && token.value.length > 1)
+                if (token.value.length === 2)
+                    return parseInt(token.value.slice(1), 8);
+                else
+                    switch (token.value[1].toLowerCase()) {
+                        case "x":
+                            return parseInt(token.value.slice(2), 16);
+                        case "b":
+                            return parseInt(token.value.slice(2), 2);
+                    }
             return parseInt(token.value);
         } catch {
             this.errors.push(new AsmError(token.position, `invalid number ${token.value}`));
         }
     }
 
-    parseArg(args, token, required=false) {
-        if (token.type === Token.REGISTER)
-            args.push([registers.indexOf(token.value), token.value, token.position]);
-        else if (token.type === Token.NAME)
-            args.push([Args.REF, token.value, token.position]);
-        else if (token.type === Token.NUMBER) {
-            const number = this.parseNumber(token);
-            args.push([number === 0 ? Args.ZERO : Args.NUM, number, token.position]);
-        } else if (required) {
-            this.errors.push(new AsmError(token.position, `unexpected ${token}`));
-            return false;
+    parseExpression(resolveCallback, required=false) {
+        const ref = new RefExpression(resolveCallback);
+
+        if (this.parseValue(ref.set, required)) {
+            let token;
+            while ((token = this.tokenizer.lookahead()).type === Token.OPERATOR) {
+                this.tokenizer.next();
+                switch (token.value) {
+                    case "+":
+                        if (!this.parseValue(ref.add(), required))
+                            return false;
+                        break;
+                    case "-":
+                        if (!this.parseValue(ref.sub(), required))
+                            return false;
+                        break;
+                }
+            }
+            ref.done();
+            return true;
         }
-        return true;
+        return false;
     }
 
-    compile(source) {
-        const tokenizer = new Tokenizer(source);
+    resolveReference(name, value) {
+        this.names[name] = value;
+        
+        for (let i = 0; i < this.refs.length; ++i) {
+            const ref = this.refs[i];
+            if (ref.name === name) {
+                ref.resolveCallback(value);
+                this.refs.splice(i--, 1);
+            }
+        }
+    }
 
-        const refs = [];
-        const labels = {};
+    compile() {
+        const names = {};
 
         let token;
-        while ((token = tokenizer.next()).type !== Token.EOF)
-            parse: if (token.type === Token.INSTRUCTION) {
+        while ((token = this.tokenizer.next()).type !== Token.EOF)
+            if (token.type === Token.INSTRUCTION) {
                 const instruction = token.value;
                 const { position } = token;
-                const args = [];
 
-                this.parseArg(args, tokenizer.lookahead());
-
-                if (args.length > 0) {
-                    tokenizer.next();
-                    while ((token = tokenizer.lookahead()).type === Token.CHAR && token.value === ",") {
-                        tokenizer.next();
-                        if (!this.parseArg(args, tokenizer.next(), true))
-                            break parse;
-                    }
-                }
+                const args = this.parseArgs();
+                if (args == null)
+                    continue;
 
                 let opcode;
                 for (const command of commands)
@@ -483,52 +622,50 @@ export class Compiler {
 
                 if (opcode == null) {
                     this.errors.push(new AsmError(position, "unknown command"));
-                    break parse;
+                    continue;
                 }
 
                 this.bytes.push(opcode);
 
-                for (const [type, value, position] of args) {
-                    if (type === Args.NUM)
-                        this.bytes.push(value & 0xFF);
-                    else if (type === Args.REF) {
-                        const offset = labels[value];
-                        if (offset)
-                            this.bytes.push(offset);
+                for (const arg of args)
+                    if (arg.type === Args.BYTE)
+                        if (arg.value)
+                            this.bytes.push(arg.value & 0xFF);
                         else {
-                            refs.push([value, bytes.length, position]);
+                            const offset = this.bytes.length;
                             this.bytes.push(0x00);
+                            arg.resolveCallback = (value) => this.bytes[offset] = value & 0xFF;
                         }
-                    }
-                }
             } else if (token.type === Token.NAME) {
                 const name = token.value;
                 const { position } = token;
 
-                if ((token = tokenizer.next()).type !== Token.CHAR || token.value !== ":") {
+                token = this.tokenizer.next();
+
+                if (token.type === Token.KEYWORD && token.value === "db") {
+                    this.resolveReference(name, this.bytes.length);
+                    do {
+                        const offset = this.bytes.length;
+                        this.bytes.push(0x00);
+                        this.parseExpression((value) => this.bytes[offset] = value, true);
+                    } while ((token = this.tokenizer.lookahead()).type === Token.CHAR && token.value === "," && this.tokenizer.next())
+                } else if (token.type === Token.KEYWORD && token.value === "equ")
+                    this.parseExpression((value) => this.resolveReference(name, value), true);
+                else if (token.type === Token.CHAR && token.value === ":")
+                    this.resolveReference(name, this.bytes.length);
+                else {
                     this.errors.push(new AsmError(token.position, `unexpected ${token}`));
                     continue;
                 }
 
-                if (name in labels) {
+                if (name in names) {
                     this.errors.push(new AsmError(position, `label ${name} is already defined`));
                     continue;
-                }
-
-                labels[name] = this.bytes.length;
-
-                const refCount = refs.length;
-                for (let i = 0; i < refCount; ++i) {
-                    const ref = refs[i];
-                    if (ref[0] === name) {
-                        this.bytes[ref[1]] = this.bytes.length;
-                        refs.splice(i--, 1);
-                    }
                 }
             } else
                 this.errors.push(new AsmError(token.position, `unexpected ${token}`));
         
-        for (const [name, _offset, position] of refs)
+        for (const { name, position } of this.refs)
             this.errors.push(new AsmError(position, `unresolved ${name}`));
     }
 }

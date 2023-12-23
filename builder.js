@@ -82,7 +82,7 @@ export function buildDisk(bytes) {
     gameMap.setArrow(2, yOffset, 10, 2, false);
     for (let xOffset = 3; xOffset < 13;) {
         gameMap.setArrow(++xOffset, yOffset, 5, 2, false);
-        gameMap.setArrow(++xOffset, yOffset, 16, 2, false);
+        gameMap.setArrow(++xOffset, yOffset, 16, 0, false);
         gameMap.setArrow(++xOffset, yOffset, 19, 3, false);
         gameMap.setArrow(++xOffset, yOffset, 12, 3, false);
     }
