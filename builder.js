@@ -9,7 +9,7 @@ export function buildDisk(bytes) {
     const byteCount = bytes.length;
     const lastByte = byteCount - 1;
 
-    let yOffset = -byteCount * 2 - 19;
+    let yOffset = -byteCount * 2 - 18;
 
     gameMap.paste(top, -2, yOffset);
 
