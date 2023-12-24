@@ -667,5 +667,8 @@ export class Compiler {
         
         for (const { name, position } of this.refs)
             this.errors.push(new AsmError(position, `unresolved ${name}`));
+
+        if (this.bytes.length > 256)
+            this.errors.push(new AsmError([0, 0], "memory overflow"));
     }
 }

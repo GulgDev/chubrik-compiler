@@ -24,9 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function update() {
         if (source.value.trim())
-            history.pushState(null, "", `?code=${encodeURIComponent(source.value)}`);
+            history.pushState(null, "", `${location.pathname}?code=${encodeURIComponent(source.value)}`);
         else
-            history.pushState(null, "", "/");
+            history.pushState(null, "", location.pathname);
         output.value = compile(source.value);
     }
 

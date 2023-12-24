@@ -21,13 +21,19 @@ class Chunk {
     getArrowTypes() {
         const arrowTypes = new Set();
         for (const arrow of this.arrows)
-            arrowTypes.add(arrow.type);
+            if (arrow.type !== 0)
+                arrowTypes.add(arrow.type);
         return Array.from(arrowTypes);
     }
 }
 
 export class GameMap {
     chunks = [];
+
+    constructor(save) {
+        if (save)
+            this.load(save);
+    }
 
     setArrow(x, y, type, rotation, flipped) {
         Object.assign(this.getArrow(x, y), { type, rotation, flipped });
@@ -54,6 +60,54 @@ export class GameMap {
         const chunk = new Chunk(x, y);
         this.chunks.push(chunk);
         return chunk;
+    }
+
+    paste(map, x, y) {
+        for (const chunk of map.chunks)
+            for (let i = 0; i < CHUNK_SIZE; ++i)
+                for (let j = 0; j < CHUNK_SIZE; ++j) {
+                    const arrow = chunk.arrows[i + j * CHUNK_SIZE];
+                    if (arrow.type !== 0)
+                        this.setArrow(chunk.x * CHUNK_SIZE + i + x, chunk.y * CHUNK_SIZE + j + y, arrow.type, arrow.rotation, arrow.flipped);
+                }
+    }
+
+    load(save) {
+        const buffer = atob(save).split("").map((c) => c.charCodeAt(0));
+
+        if (buffer.length < 4)
+            return;
+        let index = 0;
+        let version = buffer[index++];
+        version |= buffer[index++] << 8;
+        if (version !== 0)
+            throw new Error("Unsupported save version");
+        let chunksCount = buffer[index++];
+        chunksCount |= buffer[index++] << 8;
+        for (let i = 0; i < chunksCount; i++) {
+            let chunkX = buffer[index++];
+            chunkX |= (buffer[index++] & 0x7F) << 8;
+            if ((buffer[index - 1] & 0x80) !== 0)
+                chunkX = -chunkX;
+            let chunkY = buffer[index++];
+            chunkY |= (buffer[index++] & 0x7F) << 8;
+            if ((buffer[index - 1] & 0x80) !== 0)
+                chunkY = -chunkY;
+            const arrowsTypesCount = buffer[index++] + 1;
+            const chunk = this.getChunk(chunkX, chunkY);
+            for (let j = 0; j < arrowsTypesCount; j++) {
+                const type = buffer[index++];
+                const typeCount = buffer[index++] + 1;
+                for (let k = 0; k < typeCount; k++) {
+                    const position = buffer[index++];
+                    const rotation = buffer[index++];
+                    const arrow = chunk.getArrow(position & 0xF, position >> 4);
+                    arrow.type = type;
+                    arrow.rotation = rotation & 0x3;
+                    arrow.flipped = (rotation & 0x4) !== 0;
+                }
+            }
+        }
     }
 
     save() {
@@ -108,8 +162,6 @@ export class GameMap {
         for (let i = 0; i < length; i++) {
             binary += String.fromCharCode(bytes[i]);
         }
-        return window.btoa(binary);
-
-        return buffer;
+        return btoa(binary);
     }
 }
