@@ -23,7 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const output = document.getElementById("output");
 
     function update() {
-        history.pushState(null, "", `?code=${encodeURIComponent(source.value)}`);
+        if (source.value.trim())
+            history.pushState(null, "", `?code=${encodeURIComponent(source.value)}`);
+        else
+            history.pushState(null, "", "/");
         output.value = compile(source.value);
     }
 
