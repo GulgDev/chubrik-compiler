@@ -352,21 +352,17 @@ class Tokenizer {
         return token;
     }
 
-    skipWhitespace(skipNewline) {
-        while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n"))
-            this.consume();
-    }
-
     next(skipNewline=true) {
-        this.skipWhitespace(skipNewline);
-        
-        while (this.peekch() === ";") {
-            this.consume();
-            while (this.peekch() !== "\n" && this.peekch() != null)
+        while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n") || this.peekch() === ";") {
+            while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n"))
                 this.consume();
+            
+            while (this.peekch() === ";") {
+                this.consume();
+                while (this.peekch() !== "\n" && this.peekch() != null)
+                    this.consume();
+            }
         }
-
-        this.skipWhitespace(skipNewline);
 
         let ch = this.peekch();
         if (ch == null)
