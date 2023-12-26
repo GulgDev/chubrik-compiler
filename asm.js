@@ -624,6 +624,7 @@ export class Compiler {
 
                 this.bytes.push(opcode);
                 
+                const argc = args.length;
                 for (let i = 0; i < argc; ++i) {
                     const arg = args[i];
                     if (argTypes[i] === Args.BYTE)
