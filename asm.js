@@ -609,10 +609,11 @@ export class Compiler {
                 if (args == null)
                     continue;
 
-                let opcode;
+                let opcode, argTypes;
                 for (const command of commands)
                     if (command.match(instruction, args)) {
                         opcode = command.opcode;
+                        argTypes = command.args;
                         break;
                     }
 
@@ -622,9 +623,10 @@ export class Compiler {
                 }
 
                 this.bytes.push(opcode);
-
-                for (const arg of args)
-                    if (arg.type === Args.BYTE)
+                
+                for (let i = 0; i < argc; ++i) {
+                    const arg = args[i];
+                    if (argTypes[i] === Args.BYTE)
                         if (arg.value)
                             this.bytes.push(arg.value & 0xFF);
                         else {
@@ -632,6 +634,7 @@ export class Compiler {
                             this.bytes.push(0x00);
                             arg.resolveCallback = (value) => this.bytes[offset] = value & 0xFF;
                         }
+                }
             } else if (token.type === Token.NAME) {
                 const name = token.value;
                 const { position } = token;
