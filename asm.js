@@ -34,7 +34,7 @@ class Command {
             for (let i = 0; i < argc; ++i) {
                 const argType = this.args[i];
                 const { type, value } = args[i];
-                if (argType !== type && !(argType === Args.ZERO && value !== 0)) {
+                if (argType !== type && !(argType === Args.ZERO && value === 0)) {
                     match = false;
                     break;
                 }
