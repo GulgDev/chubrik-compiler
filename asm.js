@@ -511,10 +511,11 @@ export class Compiler {
         } else if (this.parseExpression((value) => {
             arg.value = value;
             arg.resolveCallback?.(value);
-        }, false)) {
+        }, false))
             arg.type = Args.BYTE;
-        } else if (required) {
-            this.errors.push(new AsmError(token.position, `unexpected ${token}`));
+        else {
+            if (required)
+                this.errors.push(new AsmError(token.position, `unexpected ${token}`));
             return false;
         }
         args.push(arg);
