@@ -367,7 +367,7 @@ class Tokenizer {
         let ch = this.peekch();
         if (ch == null)
             return new Token(Token.EOF, null, this.position);
-        else if (letter.test(ch))
+        else if (letter.test(ch) || ch === "_")
             return this.readName();
         else if (digit.test(ch))
             return this.readNumber();
@@ -384,7 +384,7 @@ class Tokenizer {
         let name = "";
 
         let ch;
-        while (letter.test(ch = this.peekch())) {
+        while (letter.test(ch = this.peekch()) || digit.test(ch) || ch === "_") {
             this.consume();
             name += ch;
         }
