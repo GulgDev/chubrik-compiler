@@ -7,12 +7,14 @@ const line = new GameMap("AAACAAAAAAAGCQEAABAAEwACAQYAEgAQAAMBDAATAAcABAEKCxQDFQ
 export function buildDisk(bytes) {
     const gameMap = new GameMap();
 
-    const byteCount = bytes.length;
+    let byteCount = bytes.length;
 
     if (byteCount < 8)
         bytes.push(...Array(8 - byteCount).fill(0));
-    if (byteCount % 4 != 0)
-        bytes.push(...Array(4 - byteCount).fill(0));
+    else if (byteCount % 4 != 0)
+        bytes.push(...Array(4 - (byteCount % 4)).fill(0));
+    
+    byteCount = bytes.length;
 
     gameMap.paste(top, 1, 0);
 
@@ -46,7 +48,7 @@ export function buildDisk(bytes) {
             }
         }
     }
-
+    console.log(0, byteCount / 2 + 2);
     gameMap.paste(bottom, 0, byteCount / 2 + 2);
 
     return gameMap.save();
