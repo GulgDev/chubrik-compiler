@@ -48,7 +48,6 @@ export function buildDisk(bytes) {
             }
         }
     }
-    console.log(0, byteCount / 2 + 2);
     gameMap.paste(bottom, 0, byteCount / 2 + 2);
 
     return gameMap.save();
