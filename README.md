@@ -1,6 +1,6 @@
 # [Компилятор](https://gulgdev.github.io/chubrik-compiler/)
 
-Компилирует ассемблер в коды сохранения для [компьютера Чубрика](https://github.com/chubrik/LogicArrows/blob/main/computer.md) в [Стрелочках](https://logic-arrows.io/).
+Компилирует ассемблер в коды сохранения для [компьютера Чубрика](https://github.com/chubrik/LogicArrows/blob/main/computer-v1/README.md) в [Стрелочках](https://logic-arrows.io/).
 
 ## Принцип работы
 
