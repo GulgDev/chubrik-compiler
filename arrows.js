@@ -8,7 +8,7 @@ class Arrow {
 
 class Chunk {
     arrows = new Array(CHUNK_SIZE ** 2).fill().map(() => new Arrow());
-    
+
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -56,7 +56,7 @@ export class GameMap {
         for (const chunk of this.chunks)
             if (chunk.x === x && chunk.y === y)
                 return chunk;
-        
+
         const chunk = new Chunk(x, y);
         this.chunks.push(chunk);
         return chunk;

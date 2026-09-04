@@ -3,8 +3,8 @@ const Args = {
     B: 0x1,
     C: 0x2,
     D: 0x3,
-    ZERO: 0x4,
-    BYTE: 0x5
+    BYTE: 0x4,
+    ZERO: 0x5
 };
 
 const instructions = [
@@ -60,7 +60,7 @@ const commands = [
     new Command("and", [Args.B, Args.A], 0x0D),
     new Command("and", [Args.C, Args.A], 0x0E),
     new Command("and", [Args.D, Args.A], 0x0F),
-    
+
     new Command("or", [Args.A, Args.ZERO], 0x10),
     new Command("or", [Args.A, Args.B], 0x11),
     new Command("or", [Args.A, Args.C], 0x12),
@@ -171,7 +171,7 @@ const commands = [
     new Command("ldi", [Args.B, Args.BYTE], 0x8D),
     new Command("ldi", [Args.C, Args.BYTE], 0x8E),
     new Command("ldi", [Args.D, Args.BYTE], 0x8F),
-    
+
     new Command("ld", [Args.A, Args.A], 0x90),
     new Command("ld", [Args.B, Args.A], 0x91),
     new Command("ld", [Args.C, Args.A], 0x92),
@@ -313,7 +313,7 @@ class Token {
     }
 }
 
-const whitespace = /^[ \r]$/;
+const whitespace = /^[^\S\n]$/; // including the BOM but excluding "\n", which is a token
 const digit = /^[0-9]$/;
 const letter = /^[a-z]$/i;
 
@@ -343,7 +343,7 @@ class Tokenizer {
         ++this.offset;
     }
 
-    lookahead(skipNewline=true) {
+    lookahead(skipNewline = true) {
         const { offset, line, column } = this;
         const token = this.next(skipNewline);
         this.offset = offset;
@@ -352,11 +352,11 @@ class Tokenizer {
         return token;
     }
 
-    next(skipNewline=true) {
+    next(skipNewline = true) {
         while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n") || this.peekch() === ";") {
             while (whitespace.test(this.peekch()) || (skipNewline && this.peekch() === "\n"))
                 this.consume();
-            
+
             while (this.peekch() === ";") {
                 this.consume();
                 while (this.peekch() !== "\n" && this.peekch() != null)
@@ -480,6 +480,7 @@ export class Compiler {
     errors = [];
     refs = [];
     names = {};
+    statementAddress = 0;
 
     constructor(source) {
         this.tokenizer = new Tokenizer(source);
@@ -502,7 +503,7 @@ export class Compiler {
         return args;
     }
 
-    parseArg(args, required=false) {
+    parseArg(args, required = false) {
         const token = this.tokenizer.lookahead();
         const arg = { position: token.position };
         if (token.type === Token.REGISTER) {
@@ -522,7 +523,7 @@ export class Compiler {
         return true;
     }
 
-    parseValue(resolveCallback, required=false) {
+    parseValue(resolveCallback, required = false) {
         let token = this.tokenizer.lookahead();
         if (token.type === Token.NAME) {
             const value = this.names[token.value];
@@ -533,41 +534,47 @@ export class Compiler {
         } else if (token.type === Token.NUMBER)
             resolveCallback(this.parseNumber(token));
         else if (token.type === Token.CHAR && token.value === "$")
-            resolveCallback(this.bytes.length);
+            resolveCallback(this.statementAddress);
         else {
             if (required)
                 this.errors.push(new AsmError(token.position, `unexpected ${token}`));
             return false;
         }
         this.tokenizer.next();
-        return true;
+        return token;
     }
 
     parseNumber(token) {
-        try {
-            if (token.value[0] === "0" && token.value.length > 1)
-                if (token.value.length === 2)
-                    return parseInt(token.value.slice(1), 8);
-                else
-                    switch (token.value[1].toLowerCase()) {
-                        case "x":
-                            return parseInt(token.value.slice(2), 16);
-                        case "b":
-                            return parseInt(token.value.slice(2), 2);
-                    }
-            return parseInt(token.value);
-        } catch {
-            this.errors.push(new AsmError(token.position, `invalid number ${token.value}`));
-        }
+        const value = this.parseNumberValue(token);
+        if (value == null)
+            this.errors.push(new AsmError(token.position, `invalid number '${token.value}'`));
+        return value;
     }
 
-    parseExpression(resolveCallback, required=false) {
+    parseNumberValue(token) {
+        if (token.value[0] === "0" && token.value.length > 1)
+            if (token.value.length === 2)
+                return parseIntStrict(token.value.slice(1), 8);
+            else
+                switch (token.value[1].toLowerCase()) {
+                    case "x":
+                        return parseIntStrict(token.value.slice(2), 16);
+                    case "b":
+                        return parseIntStrict(token.value.slice(2), 2);
+                }
+        return parseIntStrict(token.value, 10);
+    }
+
+    parseExpression(resolveCallback, required = false) {
         const ref = new RefExpression(resolveCallback);
 
-        if (this.parseValue(ref.set, required)) {
+        const firstToken = this.parseValue(ref.set, required);
+        if (firstToken) {
             let token;
+            let single = true;
             while ((token = this.tokenizer.lookahead()).type === Token.OPERATOR) {
                 this.tokenizer.next();
+                single = false;
                 switch (token.value) {
                     case "+":
                         if (!this.parseValue(ref.add(), required))
@@ -579,6 +586,15 @@ export class Compiler {
                         break;
                 }
             }
+
+            // A standalone literal must fit in a byte; expression components
+            // may exceed it, the result is wrapped modulo 256 instead.
+            if (single && firstToken.type === Token.NUMBER) {
+                const value = this.parseNumberValue(firstToken);
+                if (value != null && value > 255)
+                    this.errors.push(new AsmError(firstToken.position, `number ${firstToken.value} is out of range 0..255`));
+            }
+
             ref.done();
             return true;
         }
@@ -587,7 +603,7 @@ export class Compiler {
 
     resolveReference(name, value) {
         this.names[name] = value;
-        
+
         for (let i = 0; i < this.refs.length; ++i) {
             const ref = this.refs[i];
             if (ref.name === name) {
@@ -606,6 +622,7 @@ export class Compiler {
                 const instruction = token.value;
                 const { position } = token;
 
+                this.statementAddress = this.bytes.length;
                 const args = this.parseArgs();
                 if (args == null)
                     continue;
@@ -624,7 +641,7 @@ export class Compiler {
                 }
 
                 this.bytes.push(opcode);
-                
+
                 const argc = args.length;
                 for (let i = 0; i < argc; ++i) {
                     const arg = args[i];
@@ -641,6 +658,7 @@ export class Compiler {
                 const name = token.value;
                 const { position } = token;
 
+                this.statementAddress = this.bytes.length;
                 token = this.tokenizer.next();
 
                 if (token.type === Token.KEYWORD && token.value === "db") {
@@ -648,7 +666,7 @@ export class Compiler {
                     do {
                         const offset = this.bytes.length;
                         this.bytes.push(0x00);
-                        this.parseExpression((value) => this.bytes[offset] = value, true);
+                        this.parseExpression((value) => this.bytes[offset] = value & 0xFF, true);
                     } while ((token = this.tokenizer.lookahead()).type === Token.CHAR && token.value === "," && this.tokenizer.next())
                 } else if (token.type === Token.KEYWORD && token.value === "equ")
                     this.parseExpression((value) => this.resolveReference(name, value), true);
@@ -659,17 +677,28 @@ export class Compiler {
                     continue;
                 }
 
-                if (name in names) {
-                    this.errors.push(new AsmError(position, `label ${name} is already defined`));
-                    continue;
-                }
+                if (name in names)
+                    this.errors.push(new AsmError(position, `label '${name}' is already defined`));
+                else
+                    names[name] = true;
             } else
                 this.errors.push(new AsmError(token.position, `unexpected ${token}`));
-        
+
         for (const { name, position } of this.refs)
-            this.errors.push(new AsmError(position, `unresolved ${name}`));
+            this.errors.push(new AsmError(position, `unresolved '${name}'`));
 
         if (this.bytes.length > 256)
             this.errors.push(new AsmError([0, 0], "memory overflow"));
     }
+}
+
+const radixPatterns = {
+    2: /^[01]+$/,
+    8: /^[0-7]+$/,
+    10: /^[0-9]+$/,
+    16: /^[0-9a-f]+$/i
+};
+
+function parseIntStrict(string, radix) {
+    return radixPatterns[radix].test(string) ? parseInt(string, radix) : null;
 }

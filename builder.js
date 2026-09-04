@@ -13,7 +13,7 @@ export function buildDisk(bytes) {
         bytes.push(...Array(8 - byteCount).fill(0));
     else if (byteCount % 4 != 0)
         bytes.push(...Array(4 - (byteCount % 4)).fill(0));
-    
+
     byteCount = bytes.length;
 
     gameMap.paste(top, 1, 0);
